@@ -1,0 +1,2 @@
+/usr/bin/ar qc libconvenience.a  CMakeFiles/convenience.dir/convenience.cpp.o
+/usr/bin/ranlib libconvenience.a

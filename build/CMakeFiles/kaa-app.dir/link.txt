@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/kaa-app.dir/NotificationDemo_with_actual_sampling.cpp.o  -o kaa-app -rdynamic kaa/libkaacpp.a -lrtlsdr /usr/local/lib/libbotan-1.11.so /usr/local/lib/libavrocpp.so -lboost_log -lboost_system -lboost_thread -lboost_log_setup -lboost_date_time -lboost_filesystem -lboost_regex -lboost_chrono -lboost_atomic -lpthread -lpthread -Wl,-rpath,/usr/local/lib 
