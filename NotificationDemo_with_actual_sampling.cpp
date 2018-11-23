@@ -36,7 +36,7 @@ static int samplingPeriod = 1; //seconds
 static std::string numberOfBins = "256";
 static std::string numberOfSpectraToAvg = "32";
 static rtlsdr_dev_t *dev = NULL;
-std::string cmd_for_power = "./rtl_power_fftw -n 2 -q -b 512 -f 916e6 -g 1";
+std::string cmd_for_power = "./rtl_power_fftw -n 32 -q -b 256 -f 916e6 -g 1";
 static bool differentIqSampleSizes = false;
 static int iq_size = 4 * 1024 * 1024;
 
@@ -142,7 +142,7 @@ static void processNotification(const KaaNotification &notification, const kaa_n
 #define READ 0
 #define WRITE 1
 
-#define RAW_SIZE (2 * 1024 *1024) 
+#define RAW_SIZE (4 * 1024) 
 static	int exec_raw(unsigned char *array) 
 {
     uint32_t out_block_size = RAW_SIZE;
@@ -159,15 +159,20 @@ static	int exec_raw(unsigned char *array)
 
 static void extractData(std::shared_ptr<IKaaClient> kaaClient)
 {
+    FILE *fp;
+    int sampleCount = 0;
     if (!switch_flag) 
     {
 		char buffer[128];
 		const char *cmd = cmd_for_power.c_str();
-		std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+		//std::shared_ptr<FILE> pipe(popen(cmd, "r"),pclose);
+		fp  = popen(cmd, "r");
+
 		if (!pipe) throw std::runtime_error("popen() failed!");
-			while (!feof(pipe.get())) 
+                sampleCount = 0;
+			while (!feof(fp)) 
             {
-				if (fgets(buffer, 128, pipe.get()) != nullptr) 
+				if (fgets(buffer, 128, fp) != nullptr) 
                 {
 					std::stringstream ss;
 					ss << buffer;
@@ -177,8 +182,12 @@ static void extractData(std::shared_ptr<IKaaClient> kaaClient)
 					logRecord.nodenumber = 3;
 					kaaClient->addLogRecord(logRecord);
 					std::cout << "Sampled power and frequency: " << logRecord.power << " " << logRecord.frequency << std::endl;
+                                        sampleCount++;
 			    }
+                    if(sampleCount == 3)
+                    	break;
 		    }
+		pclose(fp);
         /*kaa::KaaUserLogRecord logRecord;
 	//srand(200);
         logRecord.frequency = (rand() % 20) + 8;
@@ -264,18 +273,22 @@ int main()
     {
     	std::cout << (boost::format("Topic ID-> %1%, Topic name-> %2%") % topic.id % topic.name) << std::endl;
     }
-    switch_flag = true; //Start with taking IQ samples
+    switch_flag = false; //Start with taking power-freq samples
 
-    if (switch_flag)
-	set_up_device();
+    //if (switch_flag)
+	//set_up_device();
     while (true) 
     {
+	    /*if(counter == 1){
+		std::cout << "Breaking out" << std::endl;
+		break;
+	    }*/
 	    counter++;
             extractData(kaaClient);
 	    std::cout << counter << "--->In loop with flag : " << switch_flag << std::endl;
 	    std::this_thread::sleep_for (std::chrono::seconds(samplingPeriod));
-	    if(counter == 50)
-		break;
+	    //if(counter == 100)
+		//break;
     }
 
     clock_t stopTime = clock();
