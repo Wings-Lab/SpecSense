@@ -179,7 +179,7 @@ static void extractData(std::shared_ptr<IKaaClient> kaaClient)
 					kaa::KaaUserLogRecord logRecord;
 					ss >> logRecord.frequency;
 					ss >> logRecord.power;
-					logRecord.nodenumber = 3;
+					logRecord.nodenumber = 110;
 					kaaClient->addLogRecord(logRecord);
 					std::cout << "Sampled power and frequency: " << logRecord.power << " " << logRecord.frequency << std::endl;
                                         sampleCount++;
